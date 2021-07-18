@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<yandex>
+    <logger>
+        <level>error</level>
+        <log>./data/log/clickhouse-server.log</log>
+        <errorlog>./data/log/clickhouse-server.err.log</errorlog>
+        <size>1000M</size>
+        <count>10</count>
+    </logger>
+    <display_name>dev</display_name>
+
+    <!-- affects all ports! -->
+    <!-- <listen_host>0.0.0.0</listen_host> -->
+
+    <http_port>8123</http_port>
+    <tcp_port>9100</tcp_port>
+    <interserver_http_port>9109</interserver_http_port>
+
+    <zookeeper>
+      <node>
+        <host>127.0.0.1</host> <!-- server1 -->
+        <port>2181</port>
+      </node>
+      <node>
+        <host>127.0.0.1</host> <!-- server2 -->
+        <port>2882</port>
+      </node>
+      <node>
+        <host>127.0.0.1</host> <!-- server3 -->
+        <port>2883</port>
+      </node>
+      <session_timeout_ms>30000</session_timeout_ms>
+      <operation_timeout_ms>10000</operation_timeout_ms>
+      <identity>user:password</identity>
+    </zookeeper>
+
+    <prometheus>
+      <endpoint>/</endpoint>
+      <port>8001</port>
+      <metrics>true</metrics>
+      <events>true</events>
+      <asynchronous_metrics>true</asynchronous_metrics>
+    </prometheus>
+
+    <max_connections>10</max_connections>
+    <keep_alive_timeout>120</keep_alive_timeout>
+    <max_concurrent_queries>10</max_concurrent_queries>
+    <uncompressed_cache_size>8589934592</uncompressed_cache_size>
+    <mark_cache_size>5368709120</mark_cache_size>
+    <path>./data/data</path>
+    <tmp_path>./data/tmp</tmp_path>
+    <user_files_path>./data/files</user_files_path>
+    <users_config>users.xml</users_config>
+    <default_profile>default</default_profile>
+    <default_database>default</default_database>
+    <macros incl="macros" optional="true" />
+    <builtin_dictionaries_reload_interval>3600</builtin_dictionaries_reload_interval>
+    <max_session_timeout>3600</max_session_timeout>
+    <default_session_timeout>60</default_session_timeout>
+    <query_log>
+        <database>system</database>
+        <table>query_log</table>
+        <partition_by>toYYYYMM(event_date)</partition_by>
+        <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+    </query_log>
+    <dictionaries_config>*_dictionary.xml</dictionaries_config>
+    <format_schema_path>./data/schemas</format_schema_path>
+    <send_crash_reports>
+      <enabled>false</enabled>
+    </send_crash_reports>
+</yandex>

@@ -1,0 +1,6 @@
+* TODO clickhouse client
+  - [ ] create-table, select, insert macro
+  - [ ] implement placeholders escaping values during replacement
+  - [ ] emit query in text
+  - [ ] connection pool
+  - [ ] implement more statements

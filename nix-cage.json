@@ -1,0 +1,24 @@
+{
+    "mounts": {
+        "rw": [
+            ".", "~/.emacs.d",
+	    ["./.cache",  "~/.cache", "d"],
+	    ["./.config", "~/.config", "d"],
+	    ["./.local",  "~/.local", "d"],
+	    ["./.quicklisp",  "~/quicklisp", "d"],
+	    ["$SSH_AUTH_SOCK", "$SSH_AUTH_SOCK"],
+            "/run"
+        ],
+        "ro": [
+            "~/.ssh",
+            "~/.gitconfig",
+            "/"
+        ],
+        "dev": ["/dev"],
+        "tmpfs": [
+            "/tmp",
+            "/home",
+            "~"
+        ]
+    }
+}

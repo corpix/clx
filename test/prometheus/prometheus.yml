@@ -1,0 +1,20 @@
+global:
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  evaluation_interval: 15s
+alerting:
+  alertmanagers:
+  - scheme: http
+    timeout: 10s
+    api_version: v1
+    static_configs:
+    - targets: []
+scrape_configs:
+  - job_name: clickhouse
+    metrics_path: /
+    static_configs: [{targets: [127.0.0.1:8001, 127.0.0.1:8002, 127.0.0.1:8003]}]
+  - job_name: zookeeper
+    # zookeeper metrics path is hardcoded
+    # see: https://github.com/apache/zookeeper/blob/b79abb2014db9684c00afd7d98c0a7cb69ce6c8b/zookeeper-metrics-providers/zookeeper-prometheus-metrics/src/main/java/org/apache/zookeeper/metrics/prometheus/PrometheusMetricsProvider.java#L94
+    # metrics_path: /metrics
+    static_configs: [{targets: [127.0.0.1:2281, 127.0.0.1:2282, 127.0.0.1:2283]}]
