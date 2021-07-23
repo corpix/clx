@@ -1,6 +1,13 @@
 (defpackage clx/clickhouse
-  (:use :cl)
-  (:export :hello))
+  (:use :cl))
 (in-package :clx/clickhouse)
 
-(defvar hello 1)
+(defstruct ast/create-table)
+(defstruct ast/insert)
+(defstruct ast/select)
+
+;;
+
+(defmacro create-table)
+(defmacro insert)
+(defmacro select)

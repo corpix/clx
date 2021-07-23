@@ -30,8 +30,9 @@ in stdenv.mkDerivation rec {
     git jq yq-go tmux findutils gnumake
     hivemind
 
-    clickhouse prometheus zookeeper
-    gnuplot ansible
+    #clickhouse
+    # prometheus zookeeper
+    #gnuplot ansible
     openssl
 
     rlwrap sbcl lispPackages.quicklisp lispPackages.swank
@@ -46,6 +47,7 @@ in stdenv.mkDerivation rec {
 
     export LANG="en_US.UTF-8"
     export NIX_PATH="nixpkgs=${nixpkgs}"
+    export LD_LIBRARY_PATH="${pkgs.openssl.out}/lib"
 
     if [ ! -z "$PS1" ]
     then

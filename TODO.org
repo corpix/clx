@@ -1,3 +1,7 @@
+* TODO telegram api
+  - [ ] initial dsl
+  - [ ] photo & file uploads
+  - [ ] bot (persistent) state management (sqlite?)
 * TODO clickhouse client
   - [ ] create-table, select, insert macro
   - [ ] implement placeholders escaping values during replacement

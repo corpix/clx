@@ -11,5 +11,6 @@
 /.cache/*
 /.config/*
 /.local/*
+/main
 .quicklisp/*
 !.quicklisp/.keep

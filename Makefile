@@ -1,15 +1,15 @@
 .DEFAULT_GOAL := all
 
-name               = clx
-namespace          = corpix
-version           ?= development
+name           = clx
+namespace      = corpix
+version       ?= development
 
 root          := $(patsubst %/,%,$(dir $(realpath $(firstword $(MAKEFILE_LIST)))))
 nix_dir       := nix
 tmux          := tmux -2 -f $(root)/.tmux.conf -S $(root)/.tmux
 tmux_session  := $(name)
 nix           := nix $(NIX_OPTS)
-sbcl          := sbcl --load $(root)/.quicklisp/setup.lisp --load $(root)/setup.lisp
+sbcl          := sbcl --noinform --load $(root)/.quicklisp/setup.lisp --load $(root)/setup.lisp
 
 
 shell_volume := nix
@@ -58,18 +58,24 @@ help: # print defined targets and their comments
 .PHONY: init
 init: .quicklisp/setup.lisp # initialize project for development
 
+.PHONY: build
+build: .quicklisp/setup.lisp build.lisp # build binary
+	$(sbcl) --disable-debugger --load build.lisp
+
+.PHONY: run
+run: build
+	./main
+
 .PHONY: test
 test: .quicklisp/setup.lisp # run unit tests
-	$(sbcl)                         \
-		--eval '(import :rove)' \
-		--eval '(rove:run :$(namespace)/$(name)/tests)'
+	$(sbcl) --disable-debugger --load test.lisp
 
 
 ##
 
 .PHONY: run/swank
 run/swank: .quicklisp/setup.lisp # run swank server for slime
-	$(sbcl) --load $(root)/swank.lisp
+	$(sbcl) --disable-debugger --load $(root)/swank.lisp
 
 .PHONY: run/slynk
 run/slynk: .quicklisp/setup.lisp # run slynk server for sly
