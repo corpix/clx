@@ -1,0 +1,1 @@
+dists/quicklisp/software/quri-20210630-git/quri.asd

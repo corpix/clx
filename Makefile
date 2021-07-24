@@ -9,8 +9,12 @@ nix_dir       := nix
 tmux          := tmux -2 -f $(root)/.tmux.conf -S $(root)/.tmux
 tmux_session  := $(name)
 nix           := nix $(NIX_OPTS)
-sbcl          := sbcl --noinform --load $(root)/.quicklisp/setup.lisp --load $(root)/setup.lisp
 
+vendor        := $(root)/vendor
+quicklisp     := $(vendor)/quicklisp/setup.lisp
+sbcl          := sbcl --noinform
+sbcl_vendor   := --load $(quicklisp) --load $(root)/setup.lisp
+sbcl_tool     := --disable-debugger
 
 shell_volume := nix
 shell_opts = -v $(shell_volume):/nix:rw         \
@@ -52,34 +56,34 @@ help: # print defined targets and their comments
 
 ## development
 
-.quicklisp/setup.lisp: # initialize quicklisp directory
-	quicklisp init
-
 .PHONY: init
-init: .quicklisp/setup.lisp # initialize project for development
+init: $(quicklisp) # initialize project for development
+
+.PHONY: vendor
+vendor $(quicklisp): # initialize a vendor directory
+	sbcl $(sbcl_tool) --load vendor.lisp
 
 .PHONY: build
-build: .quicklisp/setup.lisp build.lisp # build binary
-	$(sbcl) --disable-debugger --load build.lisp
+build: $(quicklisp) build.lisp # build binary
+	sbcl $(sbcl_tool) $(sbcl_vendor) --load build.lisp
 
 .PHONY: run
-run: build
+run: build # run main application
 	./main
 
 .PHONY: test
-test: .quicklisp/setup.lisp # run unit tests
-	$(sbcl) --disable-debugger --load test.lisp
-
+test: $(quicklisp) # run unit tests
+	sbcl $(sbcl_tool) $(sbcl_vendor) --load test.lisp
 
 ##
 
 .PHONY: run/swank
-run/swank: .quicklisp/setup.lisp # run swank server for slime
-	$(sbcl) --disable-debugger --load $(root)/swank.lisp
+run/swank: $(quicklisp) # run swank server for slime
+	sbcl $(sbcl_tool) $(sbcl_vendor) --load $(root)/swank.lisp
 
 .PHONY: run/slynk
-run/slynk: .quicklisp/setup.lisp # run slynk server for sly
-	$(sbcl) --load $(root)/slynk.lisp
+run/slynk: $(quicklisp) # run slynk server for sly
+	sbcl $(sbcl_tool) $(sbcl_vendor) --load $(root)/slynk.lisp
 
 
 ## testing
@@ -182,7 +186,7 @@ run/cage/shell: # enter sandboxed development environment with nix-cage
 
 .PHONY: run/repl
 run/repl: # run sbcl repl
-	rlwrap sbcl
+	rlwrap sbcl $(sbcl_vendor)
 
 .PHONY: run/nix/repl
 run/nix/repl: # run nix repl for nixpkgs from env

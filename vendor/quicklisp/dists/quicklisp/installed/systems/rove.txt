@@ -1,0 +1,1 @@
+dists/quicklisp/software/rove-20200325-git/rove.asd

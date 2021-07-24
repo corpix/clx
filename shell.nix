@@ -30,12 +30,11 @@ in stdenv.mkDerivation rec {
     git jq yq-go tmux findutils gnumake
     hivemind
 
-    #clickhouse
+    # clickhouse
     # prometheus zookeeper
-    #gnuplot ansible
     openssl
 
-    rlwrap sbcl lispPackages.quicklisp lispPackages.swank
+    rlwrap sbcl
   ];
   shellHook = ''
     export root=$(pwd)

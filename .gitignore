@@ -12,5 +12,5 @@
 /.config/*
 /.local/*
 /main
-.quicklisp/*
-!.quicklisp/.keep
+/vendor/quicklisp/tmp
+
