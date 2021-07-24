@@ -13,4 +13,5 @@
 /.local/*
 /main
 /vendor/quicklisp/tmp
+/.tmux
 
