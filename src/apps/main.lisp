@@ -1,9 +1,11 @@
 (in-package :cl-user)
 (defpackage clx/apps/main
   (:use :cl)
-  (:export :main))
+  (:export :main :*version*))
 (in-package :clx/apps/main)
 
+(defparameter *version* "dev")
+
 (defun main ()
-  (print "hello world")
+  (format t "hello world ~a" *version*)
   (fresh-line))

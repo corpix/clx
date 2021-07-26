@@ -4,10 +4,18 @@
   :author "Dmitry Moskowski"
   :license "public domain"
   :depends-on (:alexandria
+	       :lisp-binary
+	       :babel
+	       :iterate
+	       :ironclad
 	       :trivia
+	       :usocket
+	       :cl-async
 	       :dexador
 	       :quri
-	       :jonathan)
+	       :jonathan
+	       :cffi
+	       :cffi-grovel)
   :components ((:module "src"
 		:components (;;(:file "clickhouse")
 			     (:file "http")

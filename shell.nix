@@ -5,6 +5,7 @@ with builtins;
 with import nixpkgs { inherit config; };
 with lib;
 let
+  pkg = import ./default.nix { inherit pkgs; };
   shellWrapper = writeScript "shell-wrapper" ''
     #! ${stdenv.shell}
     set -e
@@ -30,12 +31,12 @@ in stdenv.mkDerivation rec {
     git jq yq-go tmux findutils gnumake
     hivemind
 
-    # clickhouse
+    clickhouse
+    nsq
     # prometheus zookeeper
-    openssl
 
     rlwrap sbcl
-  ];
+  ] ++ pkg.buildInputs;
   shellHook = ''
     export root=$(pwd)
 
@@ -46,7 +47,8 @@ in stdenv.mkDerivation rec {
 
     export LANG="en_US.UTF-8"
     export NIX_PATH="nixpkgs=${nixpkgs}"
-    export LD_LIBRARY_PATH="${pkgs.openssl.out}/lib"
+
+    ${pkg.librariesEnvironment}
 
     if [ ! -z "$PS1" ]
     then

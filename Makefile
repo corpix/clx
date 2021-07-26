@@ -174,6 +174,19 @@ run/prometheus: test/prometheus/data # run prometheus metrics collection service
 clean:: # remove prometheus data
 	rm -rf test/prometheus/data
 
+##
+
+.PHONY: test/nsq/data
+test/nsq/data: # make sure nsq data directory exists
+	mkdir -p $@
+
+.PHONY: run/nsq
+run/nsq: test/nsq/data # run nsq server
+	@bash -xec "cd $(dir $<); exec nsqd -config nsqd.cfg"
+
+clean:: # remove nsq data
+	rm -rf test/nsq/data
+
 ## env
 
 .PHONY: run/shell

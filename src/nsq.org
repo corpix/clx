@@ -1,0 +1,57 @@
+* protocol research
+
+  frame types:
+  - =FrameTypeResponse 0=
+  - =FrameTypeError    1=
+  - =FrameTypeMessage  2=
+
+  #+begin_src lisp
+    ;; frame response structure
+    ;; [x][x][x][x][x][x][x][x][x][x][x][x]...
+    ;; |  (int32) ||  (int32) || (binary)
+    ;; |  4-byte  ||  4-byte  || N-byte
+    ;; ------------------------------------...
+    ;;     size     frame type     data
+
+    ;; data field structure for a frame with type "message"
+    ;; [x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x]...
+    ;; |       (int64)        ||    ||      (hex string encoded in ASCII)           || (binary)
+    ;; |       8-byte         ||    ||                 16-byte                      || N-byte
+    ;; ------------------------------------------------------------------------------------------...
+    ;;   nanosecond timestamp    ^^                   message ID                       message body
+    ;;                        (uint16)
+    ;;                         2-byte
+    ;;                        attempts
+  #+end_src
+
+  listen for messages:
+
+  #+begin_src bash
+    nsq_tail --topic test --nsqd-tcp-address 127.0.0.1:4150
+  #+end_src
+
+  send test message:
+
+  #+begin_src bash :results verbatim raw
+      echo -en '  V2PUB topic\n\0\0\0\x04aaaa' | stdbuf -i0 -o0 nc -v 127.0.0.1 4150 | hexdump -C
+  #+end_src
+
+  #+RESULTS:
+  00000000  00 00 00 06 00 00 00 00  4f 4b 00 00 00 0f 00 00  |........OK......|
+  00000010  00 00 5f 68 65 61 72 74  62 65 61 74 5f           |.._heartbeat_|
+  0000001d
+
+  2 messages received:
+  - =OK=
+  - =_heartbeat_=
+
+  heartbeat message length
+
+  #+begin_src text
+    CLX/NSQ> #x0f
+    15 (4 bits, #xF, #o17, #b1111)
+    CLX/NSQ> (length "_heartbeat_")
+    11 (4 bits, #xB, #o13, #b1011)
+    CLX/NSQ> (+ 11 4) ;; 4 bytes is reserved for frame type
+    15 (4 bits, #xF, #o17, #b1111)
+  #+end_src
