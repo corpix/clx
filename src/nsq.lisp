@@ -18,9 +18,13 @@
 	   #:nsq-unsupported-frame-type
 
 	   #:nsq
+	   #:close
 	   #:publish
 	   #:subscribe
-	   #:close
+	   #:ready
+	   #:finish
+	   #:requeue
+	   #:touch
 	   #:make-nsq))
 (in-package #:clx/nsq)
 
