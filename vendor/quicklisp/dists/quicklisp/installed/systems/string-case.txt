@@ -1,0 +1,1 @@
+dists/quicklisp/software/string-case-20180711-git/string-case.asd

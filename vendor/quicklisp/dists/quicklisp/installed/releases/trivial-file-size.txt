@@ -1,0 +1,1 @@
+dists/quicklisp/software/trivial-file-size-20200427-git/

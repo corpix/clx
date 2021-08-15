@@ -1,1 +1,0 @@
-dists/quicklisp/software/cl-fad-20210124-git/

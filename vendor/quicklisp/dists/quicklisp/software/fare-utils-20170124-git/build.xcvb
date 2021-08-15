@@ -1,0 +1,27 @@
+#+xcvb
+(module
+ (:fullname "/fare-utils"
+  :build-depends-on ("/asdf" "/fare-memoization")
+  :depends-on
+  ("package"
+   "base/utils"
+   "base/strings"
+   "base/symbols"
+   "base/macros"
+   "base/lists"
+   "base/packages"
+   "base/objects"
+   "base/streams"
+   "base/hash-tables"
+   "base/more-strings"
+   "base/parse-cl-syntax"
+   "filesystem/pathnames"
+   "filesystem/files"
+   "filesystem/atomic"
+   "stateful/package"
+   "stateful/container"
+   ;;"stateful/binary-heap"
+   ;;"stateful/binomial-heap"
+   ;;"stateful/sorting"
+   "stateful/dllist")
+  :supersedes-asdf ("fare-utils")))

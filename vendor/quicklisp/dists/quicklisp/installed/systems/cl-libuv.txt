@@ -1,1 +1,0 @@
-dists/quicklisp/software/cl-libuv-20200610-git/cl-libuv.asd

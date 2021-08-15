@@ -1,0 +1,1 @@
+dists/quicklisp/software/fare-quasiquote-20200925-git/fare-quasiquote.asd

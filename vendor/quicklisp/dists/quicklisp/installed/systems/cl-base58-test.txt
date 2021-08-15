@@ -1,0 +1,1 @@
+dists/quicklisp/software/cl-base58-20150113-git/cl-base58-test.asd

@@ -1,0 +1,34 @@
+language: node_js
+node_js:
+  - "node"
+
+sudo: false
+
+env:
+  global:
+    - PATH=~/.roswell/bin:$PATH
+    - LD_LIBRARY_PATH=$HOME/libuv/lib:$HOME/libfixposix/lib:$LD_LIBRARY_PATH
+    - C_INCLUDE_PATH=$HOME/libuv/include:$HOME/libfixposix/include:$C_INCLUDE_PATH
+    - CPLUS_INCLUDE_PATH=$C_INCLUDE_PATH
+    - ROSWELL_BRANCH=release
+    - ROSWELL_INSTALL_DIR=$HOME/.roswell
+  matrix:
+    - LISP=sbcl-bin
+    - LISP=ccl-bin
+
+install:
+  # libuv for Wookie
+  - if ! [ -f "$HOME/libuv/include/uv.h" ]; then ./t/install-libuv.sh; fi
+  # libfixposix for IOLib
+  - if ! [ -f "$HOME/libfixposix/include/lfp.h" ]; then ./t/install-libfixposix.sh; fi
+  # Install Roswell
+  - if ! $(which ros >/dev/null); then
+      curl -L https://raw.githubusercontent.com/roswell/roswell/$ROSWELL_BRANCH/scripts/install-for-ci.sh | sh;
+    fi
+  - npm install ws
+  - ros install fukamachi/clack
+
+script:
+  - CLACK_HANDLER=wookie ./run-tests.sh
+  - CLACK_HANDLER=hunchentoot ./run-tests.sh
+  - ./run-client-tests.sh

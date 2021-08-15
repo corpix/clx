@@ -1,1 +1,0 @@
-dists/quicklisp/software/trivial-ssh-20191130-git/trivial-ssh-test.asd

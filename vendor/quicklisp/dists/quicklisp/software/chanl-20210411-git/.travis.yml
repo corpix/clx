@@ -1,0 +1,26 @@
+language: lisp
+sudo: false
+
+env:
+  global:
+    - PATH=~/.roswell/bin:$PATH
+    - ROSWELL_INSTALL_DIR=$HOME/.roswell
+  matrix:
+    - LISP=abcl
+    - LISP=allegro
+    - LISP=ccl
+    - LISP=clisp
+    - LISP=cmu
+    - LISP=ecl
+    - LISP=sbcl
+
+install:
+    - curl https://raw.githubusercontent.com/snmsts/roswell/release/scripts/install-for-ci.sh | sh
+
+cache:
+  directories:
+    - $HOME/.roswell
+    - $HOME/.config/common-lisp
+
+script:
+  - ros -e '(progn (ql:quickload "chanl/tests") (asdf:test-system "chanl"))'

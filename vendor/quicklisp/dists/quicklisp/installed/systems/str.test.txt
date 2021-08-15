@@ -1,0 +1,1 @@
+dists/quicklisp/software/cl-str-20210531-git/str.test.asd
