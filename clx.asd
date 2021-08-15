@@ -3,23 +3,47 @@
   :version "0.1.0"
   :author "Dmitry Moskowski"
   :license "public domain"
-  :depends-on (:alexandria
+  :depends-on (:cl-reexport
+	       :cl-octet-streams
+	       :cl-ppcre
+	       :cl-intbytes
+	       :bit-smasher
+	       :arrow-macros
+	       :alexandria
+	       :serapeum
+	       :bordeaux-threads
+	       :lparallel
+	       :event-emitter
+	       :chanl
 	       :lisp-binary
-	       :babel
-	       :iterate
-	       :ironclad
+	       :str
 	       :trivia
 	       :usocket
-	       :cl-async
+	       :uiop
+	       :iterate
+	       :babel
+	       :local-time
+	       :local-time-duration
+	       :flexi-streams
+	       :ironclad
 	       :dexador
+	       :websocket-driver
 	       :quri
 	       :jonathan
 	       :cffi
 	       :cffi-grovel)
   :components ((:module "src"
-		:components (;;(:file "clickhouse")
+		:components ((:file "std")
+			     (:file "stream")
+			     (:file "binary")
+			     (:file "channel")
+			     (:file "process")
+			     (:file "json")
+			     (:file "time")
+			     (:file "uri")
 			     (:file "http")
-			     (:file "telegram")))))
+			     (:file "telegram")
+			     (:file "nsq")))))
 
 (defsystem :clx/tests
   :version "0.1.0"

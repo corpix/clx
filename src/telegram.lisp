@@ -1,66 +1,59 @@
-(in-package :cl-user)
+(in-package #:cl-user)
 (defpackage clx/telegram
-  (:nicknames :clx/tg)
-  (:use :cl)
-  (:import-from :trivia :let-match*)
-  (:export
+  (:nicknames #:clx/tg)
+  (:use #:clx/std #:clx/http #:clx/uri)
+  (:local-nicknames (#:json #:clx/json))
+  (:import-from #:trivia #:let-match*)
+  (:export #:*token*
+	   #:*api*
+	   #:*poll-timeout*
+	   #:token-required
 
-   :*token*
-   :*url*
-   :*timeout*
-   :*poll-timeout*
-   :*log*
-   :token-is-not-set
-
-   :defbotapi
-   :get-me
-   :get-updates
-   :send-message
-   :send-photo))
-(in-package :clx/telegram)
+	   #:defbotapi
+	   #:get-me
+	   #:get-updates
+	   #:send-message
+	   #:send-photo
+	   #:send-document))
+(in-package #:clx/telegram)
 
 (defparameter *token* "")
-(defparameter *url* "https://api.telegram.org")
-(defparameter *timeout* 5)
+(defparameter *api* "https://api.telegram.org")
 (defparameter *poll-timeout* 120)
-(defparameter *log* (lambda (&rest xs) (print xs)))
 
 ;;
 
-(define-condition token-is-not-set (error)
+(define-condition token-required (error)
   ()
-  (:documentation "Telegram Bot API token should be set")
+  (:documentation "Telegram Bot API token should be defined")
   (:report (lambda (condition stream)
+	     (declare (ignore condition))
 	     (format stream "Telegram Bot API token should be defined via PARAMETER *token*, currently it's value is ~s"
 		     *token*))))
 
 ;;
 
-(defun uri (method)
+(defun method-uri (method)
   "Construct URI to call a Telegram Bot API method"
   (when (equalp "" *token*)
-    (error 'token-is-not-set))
-  (quri:uri (concatenate 'string *url* "/bot" *token* "/" method)))
+    (error 'token-required))
+  (uri (concatenate 'string *api* "/bot" *token* "/" method)))
 
 ;;
 
 (defun encode-query (req parameters)
-  (setf (clx/http:request-uri req)
-	(apply #'clx/http:uri-with-query-params
-	       (clx/http:request-uri req)
+  (setf (request-uri req)
+	(apply #'uri-with-query-params
+	       (request-uri req)
 	       parameters))
   req)
 
-;; FIXME: there is no 'encode-json' func
-;; because content type automagically infered by dexador :(
-;; maybe port my http client from scheme/improve dexador?
 (defun encode-body (req parameters)
-  (setf (clx/http:request-content req)
-	parameters)
+  (setf (request-content req) parameters)
   req)
 
-(defun decode-json (payload)
-  (jojo:parse payload))
+(defun decode-body (payload)
+  (json:decode payload))
 
 ;;
 
@@ -76,13 +69,13 @@
 		 ((list request-method api-method) descriptor)
 		 ((list encode decode) transformers))
       `(defun ,name ,(and parameters `(&key ,@parameters))
-	 (let* ((req (clx/http:make-request
-		      :uri (uri ,api-method)
+	 (let* ((req (make-request
+		      :uri (method-uri ,api-method)
 		      :method ,request-method))
 		(parameters (list ,@keyword-parameters))
 		(encode ,encode)
 		(decode ,decode)
-		(result (clx/http:do-request
+		(result (do-request
 			    (if encode
 				(funcall encode req parameters)
 				req))))
@@ -92,19 +85,23 @@
 
 (defbotapi get-me ()
   (('GET "getMe")
-   (nil #'decode-json)))
+   (nil #'decode-body)))
 
 (defbotapi get-updates ((limit 100) offset (timeout *poll-timeout*))
   (('GET "getUpdates")
-   (#'encode-query #'decode-json)))
+   (#'encode-query #'decode-body)))
 
 (defbotapi send-message (chat_id text)
   (('POST "sendMessage")
-   (#'encode-body #'decode-json)))
+   (#'encode-body #'decode-body)))
 
 (defbotapi send-photo (chat_id photo (caption ""))
   (('POST "sendPhoto")
-   (#'encode-body #'decode-json)))
+   (#'encode-body #'decode-body)))
+
+(defbotapi send-document (chat_id document (caption ""))
+  (('POST "sendDocument")
+   (#'encode-body #'decode-body)))
 
 ;;
 

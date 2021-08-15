@@ -1,45 +1,33 @@
-(in-package :cl-user)
+(in-package #:cl-user)
 (defpackage clx/http
-  (:nicknames :clx/http)
-  (:use :cl)
-  (:export
+  (:use #:clx/std #:clx/uri)
+  (:export #:request
+	   #:request-method
+	   #:request-uri
+	   #:request-content
+	   #:request-headers
+	   #:request-p
+	   #:make-request
 
-   :*verbose*
+	   #:do-request))
+(in-package #:clx/http)
 
-   :request
-   :request-method
-   :request-uri
-   :request-content
-   :request-headers
-   :request-p
-   :make-request
+(reexport-from :dexador :exclude
+	       '(:get :post :head :put :patch :delete :request
+		 :request-uri :request-method))
 
-   :uri
-   :uri-with-query-params
-   :do-request))
-(in-package :clx/http)
-
-(defparameter *verbose* nil)
+;;
 
 (defstruct request
   "Represents a prepared HTTP request"
-  method
-  uri
-  content
-  headers)
-
-(defun uri (u)
-  "Parse URI with QURI or return unchanged if it is already parsed"
-  (if (quri:uri-p u) u (quri:uri u)))
-
-(defun uri-with-query-params (uri &rest query)
-  "Set QUERY parameters into URI and return"
-  (setf (quri:uri-query-params uri) query)
-  uri)
+  (method :get :type (or keyword symbol))
+  (uri nil :type (or uri string))
+  (content nil)
+  (headers nil))
 
 (defun do-request (req)
-  (dex:request (uri (request-uri req))
-	       :verbose *verbose*
-	       :method (request-method req)
-	       :headers (request-headers req)
-	       :content (request-content req)))
+  (let ((u (request-uri req)))
+    (dex:request (if (uri-p u) u (uri u))
+		 :method (request-method req)
+		 :headers (request-headers req)
+		 :content (request-content req))))
