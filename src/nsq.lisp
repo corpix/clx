@@ -236,12 +236,12 @@
 	  (make-lock))
     (setf (slot-value obj 'response-queue)
 	  (make-instance 'bounded-channel :size 1))
-    ;; worker should be running before any command will be issue
+    ;; worker should be running before any command will be issued
     (setf (slot-value obj 'worker)
 	  (make-thread #'(lambda () (pump obj))
 		       :name "nsq-worker"))
     ;;
-    (identify obj parameters)))
+    (prog1 t (identify obj parameters))))
 
 ;;
 
@@ -250,12 +250,13 @@
     (with-lock-held (lock)
       (write-frame :identify (json:encode (or parameters :empty) :octets t)
 		   (socket-stream connection)))
-    (recv response-queue)))
+    (prog1 t (recv response-queue))))
 
 (defmethod nop ((obj nsq))
   (with-slots (connection lock) obj
     (with-lock-held (lock)
-      (write-frame :nop nil (socket-stream connection)))))
+      (prog1 t
+	(write-frame :nop nil (socket-stream connection))))))
 
 (defmethod close ((obj nsq) &key abort)
   (declare (ignore abort))
@@ -264,9 +265,7 @@
       (when (eq mode :subscriber)
 	(write-frame :cls nil (socket-stream connection))
 	(recv response-queue))
-      (socket-close connection)
-      (and (thread-alive-p worker)
-	   (join-thread worker)))))
+      (socket-close connection))))
 
 ;;
 
@@ -282,7 +281,7 @@
 			 "consider creating a separate NSQ client instance")))))
       (write-frame :pub payload (socket-stream connection)
 		   :arguments (list topic)))
-    (recv response-queue)))
+    (prog1 t (recv response-queue))))
 
 (defmethod subscribe ((obj nsq) topic channel handler)
   (with-slots (connection lock response-queue) obj
@@ -299,81 +298,80 @@
       (setf (slot-value obj 'handler) handler)
       (write-frame :sub nil (socket-stream connection)
 		   :arguments (list topic channel)))
-    (recv response-queue)))
+    (prog1 t (recv response-queue))))
 
 ;;
 
 (defmethod ready ((obj nsq) (amount integer))
   (with-slots (lock connection) obj
     (with-lock-held (lock)
-      (write-frame :rdy nil (socket-stream connection)
-		   :arguments (list (write-to-string amount))))))
+      (prog1 t
+	(write-frame :rdy nil (socket-stream connection)
+		     :arguments (list (write-to-string amount)))))))
 
 (defmethod finish ((obj nsq) (m message))
   (with-slots (lock connection) obj
     (with-lock-held (lock)
-      (write-frame :fin nil (socket-stream connection)
-		   :arguments (list (int->hex (slot-value m 'id)))))))
+      (prog1 t
+	(write-frame :fin nil (socket-stream connection)
+		     :arguments (list (int->hex (slot-value m 'id))))))))
 
 (defmethod requeue ((obj nsq) (m message) timeout)
   (with-slots (lock connection) obj
     (with-lock-held (lock)
-      (write-frame :req nil (socket-stream connection)
-		   :arguments (list (int->hex (slot-value m 'id)) timeout)))))
+      (prog1 t
+	(write-frame :req nil (socket-stream connection)
+		     :arguments (list (int->hex (slot-value m 'id)) timeout))))))
 
 (defmethod touch ((obj nsq) (m message))
   (with-slots (lock connection) obj
     (with-lock-held (lock)
-      (write-frame :touch nil (socket-stream connection)
-		   :arguments (list (int->hex (slot-value m 'id)))))))
+      (prog1 t
+	(write-frame :touch nil (socket-stream connection)
+		     :arguments (list (int->hex (slot-value m 'id))))))))
 
 ;;
 
 (defmethod pump ((obj nsq))
   (with-slots (connection parameters response-queue) obj
-    (let* ((next #'(lambda (stream)
-		     (dispatch-frame (read-frame stream))))
-	   (stream (socket-stream connection))
-	   (current (funcall next stream)))
-      (do () ((not current) nil)
-	(cond ((eq 'heartbeat current)
-	       (nop obj))
-	      ((message-p current)
-	       (let ((handler (or (slot-value-safe obj 'handler)
-				  (error "got a message to handle, but no handler defined"))))
-		 (funcall handler current)
-		 (when (not (eq :eof (peek-byte (message-stream current) nil nil :eof)))
-		   (error (format nil "~a stream is not drain" (type-of current))))))
-	      (t (send response-queue current)))
-	(setq current (funcall next stream))))))
+    (let* ((current)
+	   (next #'(lambda ()
+		     (let (value)
+		       (tagbody
+			:recur
+			  (handler-case
+			      (let ((socket (wait-for-input connection :timeout 1)))
+				(cond ((not socket) (go :recur))
+				      ((eq (socket-state socket) :read)
+				       (let ((frame (read-frame (socket-stream connection))))
+					 (setq value (and frame (dispatch-frame frame)))
+					 (go :end)))
+				      (t (go :recur))))
+			    (end-of-file (condition)
+			      (declare (ignore condition))
+			      (go :end))
+			    (sb-int:closed-stream-error (condition)
+			      (declare (ignore condition))
+			      (go :end)))
+			:end)
+		       value))))
+      (tagbody
+       :recur
+	 (setq current (funcall next))
+	 (cond ((not current) (go :end))
+	       ((eq 'heartbeat current) (nop obj))
+	       ((message-p current)
+		(let ((handler (or (slot-value-safe obj 'handler)
+				   (error "got a message to handle, but no handler defined"))))
+		  (funcall handler current)
+		  (when (not (eq :eof (peek-byte (message-stream current) nil nil :eof)))
+		    (error (format nil "~a stream is not drain" (type-of current))))))
+	       (t (send response-queue current)))
+	 (go :recur)
+       :end))))
 
 ;;
 
 (defun make-nsq (host port &key (parameters nil))
   "Construct NSQ instance with specified HOST address and PORT number"
   (make-instance 'nsq :host host :port port :parameters parameters))
-
-
-;;;;
-
-;; (defvar nsq-client-sub)
-;; (defvar sub-n)
-;; (setq sub-n 0)
-;; (setf nsq-client-sub (make-nsq "127.0.0.1" 4150 :parameters '(:|heartbeat_interval| 10000)))
-
-;; (subscribe nsq-client-sub "test" "ephemeral-channel-1"
-;; 	   #'(lambda (message)
-;; 	       (read-stream-content-into-string (message-stream message))
-;; 	       (setq sub-n (+ 1 sub-n))
-;; 	       (finish nsq-client-sub message)))
-;; (ready nsq-client-sub 1024)
-;; ;;(close nsq-client-sub)
-
-;; ;;
-
-;; (defvar nsq-client-pub)
-;; (setf nsq-client-pub (make-nsq "127.0.0.1" 4150 :parameters '(:|heartbeat_interval| 10000)))
-
-;; (time (loop :repeat 1000000
-;; 	    :do (publish nsq-client-pub "test" "hi")))
-;; ;;(close nsq-client-pub)
