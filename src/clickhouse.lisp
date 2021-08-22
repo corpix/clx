@@ -132,7 +132,7 @@
 		    :ttl ,(and ttl `(expression ,ttl))))
 
 (defmacro columns (&rest columns)
-  `(list ,@(map 'list #'(lambda (column) `(column ,@column)) columns)))
+  `(list ,@(mapcar #'(lambda (column) `(column ,@column)) columns)))
 
 (defun emit/column (tree)
   (ematch tree
@@ -149,7 +149,7 @@
 
 (defun emit/columns (tree)
   (concatenate 'string
-	       "(" (string-join (map 'list #'emit/column tree) ", ") ")"))
+	       "(" (string-join (mapcar #'emit/column tree) ", ") ")"))
 
 ;;
 
@@ -212,8 +212,8 @@
 			       "DATABASE "
 			       (if idempotent? "IF NOT EXISTS " "")
 			       (string name)
-			       (if cluster (concatenate 'string " ON CLUSTER ~a" cluster) "")
-			       (if engine (concatenate 'string " ENGINE = ~a" (emit/engine engine)) "")))
+			       (if cluster (concatenate 'string " ON CLUSTER " cluster) "")
+			       (if engine (concatenate 'string " ENGINE = " (emit/engine engine)) "")))
 		 ((ast/create/table database name idempotent? cluster columns engine)
 		  (concatenate 'string
 			       "TABLE "
@@ -239,7 +239,7 @@
 (defun emit (tree)
   (ematch tree
     ((ast/create statement)
-     (format nil "CREATE ~a" (emit/create statement)))))
+     (concatenate 'string "CREATE " (emit/create statement)))))
 
 ;;
 
