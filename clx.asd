@@ -43,7 +43,8 @@
 			     (:file "uri")
 			     (:file "http")
 			     (:file "telegram")
-			     (:file "nsq")))))
+			     (:file "nsq")
+			     (:file "clickhouse")))))
 
 (defsystem :clx/tests
   :version "0.1.0"
@@ -52,7 +53,8 @@
   :depends-on (:rove
 	       :clx)
   :components ((:module "src/tests"
-		:components ((:file "main")))))
+		:components ((:file "main")
+			     (:file "clickhouse")))))
 
 (defsystem :clx/apps/main
   :version "0.1.0"
