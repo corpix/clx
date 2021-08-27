@@ -1,10 +1,21 @@
 * TODO telegram api
-  - [ ] initial dsl
-  - [ ] photo & file uploads
+  - [X] initial dsl
+  - [X] photo & file uploads
   - [ ] bot (persistent) state management (sqlite?)
 * TODO clickhouse client
-  - [ ] create-table, select, insert macro
+  - [ ] dsl
+    - [-] create
+      - [X] database
+      - [X] table
+      - [ ] view
+      - [ ] dictionary
+      - [ ] user
+      - [ ] role
+      - [ ] row-policy
+      - [ ] quota
+      - [ ] settings-profile
+    - [ ] select
+    - [ ] insert
   - [ ] implement placeholders escaping values during replacement
-  - [ ] emit query in text
-  - [ ] connection pool
-  - [ ] implement more statements
+  - [ ] basic stateless client
+  - [ ] support for keep-alive
