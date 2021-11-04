@@ -1,8 +1,8 @@
-(in-package #:cl-user)
+(in-package :cl-user)
 (defpackage clx/uri
-  (:use #:clx/std)
-  (:export #:uri-with-query-params))
-(in-package #:clx/uri)
+  (:use :clx/std)
+  (:export :uri-with-query-params))
+(in-package :clx/uri)
 
 (reexport-from :quri)
 

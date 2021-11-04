@@ -1,7 +1,7 @@
-(in-package #:cl-user)
+(in-package :cl-user)
 (defpackage clx/stream
-  (:use #:clx/std)
-  (:export #:*null-stream*))
+  (:use :clx/std)
+  (:export :*null-stream*))
 (in-package :clx/stream)
 
 (reexport-from :flexi-streams :exclude '(:octet))

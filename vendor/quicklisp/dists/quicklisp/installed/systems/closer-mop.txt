@@ -1,1 +1,1 @@
-dists/quicklisp/software/closer-mop-20210630-git/closer-mop.asd
+dists/quicklisp/software/closer-mop-20211020-git/closer-mop.asd

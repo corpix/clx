@@ -1,1 +1,1 @@
-dists/quicklisp/software/ironclad-v0.55/ironclad-text.asd
+dists/quicklisp/software/ironclad-v0.56/ironclad-text.asd

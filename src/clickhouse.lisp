@@ -1,16 +1,19 @@
-(in-package #:cl-user)
+(in-package :cl-user)
 (defpackage clx/clickhouse
-  (:use #:clx/std)
-  (:import-from #:trivia
-		#:match
-		#:ematch
-		#:guard)
-  (:export #:create
-	   #:create/database))
-(in-package #:clx/clickhouse)
+  (:use :clx/std)
+  (:import-from
+   :trivia
+   :match
+   :ematch
+   :guard)
+  (:export
+   :create
+   :create/database))
+(in-package :clx/clickhouse)
 
 ;; https://clickhouse.tech/docs/en/sql-reference/
 ;; https://clickhouse.tech/docs/en/sql-reference/statements/create/
+;; https://clickhouse.tech/docs/en/sql-reference/statements/select/
 ;; https://clickhouse.tech/docs/en/engines/database-engines/
 
 (defstruct ast/expression
@@ -38,7 +41,8 @@
 
 (defun emit/expression (tree)
   (ematch tree
-    ((ast/expression (value (guard v (stringp v)))) v)
+    ((ast/expression (value (guard v (stringp v))))
+     (concatenate 'string "'" v "'"))
     ((ast/expression (value (guard v (numberp v))))
      (write-to-string v))
     ((ast/expression (value (guard v (eq v nil)))) "0")
@@ -60,6 +64,7 @@
 (emit/expression (expression t))   ;; => "1"
 (emit/expression (expression nil)) ;; => "0"
 (emit/expression (expression (plus 1 (multiply 2 3 4 5 6)))) ;; => "PLUS(1, MULTIPLY(2, 3, 4, 5, 6))"
+(emit/expression (expression (maybe :foo "bar")))
 
 (defstruct ast/engine/atomic)
 (defstruct ast/engine/mysql)
@@ -232,7 +237,67 @@
   (columns nil :type (or null (cons keyword)))
   (values nil :type (or null (cons (cons (or string number)))))
   (format nil :type (or null keyword)))
-(defstruct ast/select)
+
+;;
+
+;; -[WITH expr_list|(subquery)]
+;; SELECT [DISTINCT [ON (column1, column2, ...)]] expr_list
+;; [FROM [db.]table | (subquery) | -table_function] [FINAL]
+;; [SAMPLE sample_coeff]
+;; -[ARRAY JOIN ...]
+;; -[GLOBAL] [ANY|ALL|ASOF] [INNER|LEFT|RIGHT|FULL|CROSS] [OUTER|SEMI|ANTI] JOIN (subquery)|table (ON <expr_list>)|(USING <column_list>)
+;; -[PREWHERE expr]
+;; [WHERE expr]
+;; [GROUP BY expr_list] -[WITH ROLLUP|WITH CUBE] -[WITH TOTALS]
+;; -[HAVING expr]
+;; [ORDER BY expr_list] -[WITH FILL] [FROM expr] -[TO expr] -[STEP expr]
+;; -[LIMIT [offset_value, ]n BY columns]
+;; ~[LIMIT [n, ]m] -[WITH TIES]
+;; -[SETTINGS ...]
+;; -[UNION  ...]
+;; -[INTO OUTFILE filename]
+;; -[FORMAT format]
+(defstruct ast/select
+  (distinct nil :type (or boolean (cons string)))
+  (database nil :type (or null string))
+  (columns nil :type (or null (cons ast/expression)))
+  (table nil :type (or null string))
+  (subquery nil :type (or null ast/select))
+  (final? nil :type boolean)
+  (sample nil :type (or null ast/expression))
+  (where nil :type (or null ast/expression))
+  (group-by nil :type (or null (cons ast/expression)))
+  (order-by nil :type (or null (cons ast/expression)))
+  (limit nil :type (or null real)))
+
+(defmacro select (&key
+		    (distinct nil)
+		    (database nil)
+		    (columns nil)
+		    (table nil)
+		    (subquery nil)
+		    (final? nil)
+		    (sample nil)
+		    (where nil)
+		    (group-by nil)
+		    (order-by nil)
+		    (limit nil))
+  (when (and table subquery)
+    (error "can not use TABLE and SUBQUERY because they are mutually exclusive, should use TABLE or SUBQUERY"))
+  `(make-ast/select :distinct ,distinct
+		    :database ,database
+		    :columns ,(mapcar (lambda (column) `(expression ,column)) columns)
+		    :table ,table
+		    :subquery ,subquery
+		    :final? ,final?
+		    :sample ,sample
+		    :where ,where
+		    :group-by ,group-by
+		    :order-by ,order-by
+		    :limit ,limit
+		    ))
+
+(defun emit/select (tree))
 
 ;;
 

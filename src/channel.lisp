@@ -1,8 +1,8 @@
-(in-package #:cl-user)
+(in-package :cl-user)
 (defpackage clx/channel
-  (:use #:clx/std)
-  (:export #:poll))
-(in-package #:clx/channel)
+  (:use :clx/std)
+  (:export :poll))
+(in-package :clx/channel)
 
 (reexport-from :chanl :include
 	       '(:abstract-channel

@@ -1,32 +1,39 @@
-(in-package #:cl-user)
+(in-package :cl-user)
 (defpackage clx/nsq
-  (:use #:clx/std #:clx/binary #:clx/channel #:clx/time)
-  (:local-nicknames (:json :clx/json)
-		    (:streams :clx/stream))
-  (:import-from :clx/stream
-		#:make-flexi-stream
-		#:peek-byte
-		#:*null-stream*)
-  (:export #:message
-	   #:message-p
-	   #:message-timestamp
-	   #:message-attempts
-	   #:message-id
-	   #:message-stream
+  (:use
+   :clx/std
+   :clx/binary
+   :clx/channel
+   :clx/time)
+  (:local-nicknames
+   (:json :clx/json)
+   (:streams :clx/stream))
+  (:import-from
+   :clx/stream
+   :make-flexi-stream
+   :peek-byte
+   :*null-stream*)
+  (:export
+   :message
+   :message-p
+   :message-timestamp
+   :message-attempts
+   :message-id
+   :message-stream
 
-	   #:nsq-error
-	   #:nsq-unsupported-frame-type
+   :nsq-error
+   :nsq-unsupported-frame-type
 
-	   #:nsq
-	   #:close
-	   #:publish
-	   #:subscribe
-	   #:ready
-	   #:finish
-	   #:requeue
-	   #:touch
-	   #:make-nsq))
-(in-package #:clx/nsq)
+   :nsq
+   :close
+   :publish
+   :subscribe
+   :ready
+   :finish
+   :requeue
+   :touch
+   :make-nsq))
+(in-package :clx/nsq)
 
 ;; see: https://nsq.io/clients/tcp_protocol_spec.html
 

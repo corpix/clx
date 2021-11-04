@@ -1,9 +1,10 @@
-(in-package #:cl-user)
+(in-package :cl-user)
 (defpackage clx/json
-  (:use #:clx/std)
-  (:export #:encode
-	   #:decode))
-(in-package #:clx/json)
+  (:use :clx/std)
+  (:export
+   :encode
+   :decode))
+(in-package :clx/json)
 
 (defmacro encode (value &rest rest)
   `(jojo:to-json ,value ,@rest))

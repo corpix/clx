@@ -1,7 +1,7 @@
 { pkgs            ? import <nixpkgs> {}
 , source          ? ./.
 , version         ? "dev"
-, sharedLibraries ? (with pkgs; [openssl libxml2 libssh2 libuv])
+, sharedLibraries ? (with pkgs; [openssl libxml2 libssh2 libuv sqlite])
 }:
 with pkgs;
 with lib;

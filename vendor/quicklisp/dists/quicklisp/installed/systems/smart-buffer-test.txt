@@ -1,1 +1,1 @@
-dists/quicklisp/software/smart-buffer-20210630-git/smart-buffer-test.asd
+dists/quicklisp/software/smart-buffer-20211020-git/smart-buffer-test.asd

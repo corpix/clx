@@ -31,7 +31,7 @@ in stdenv.mkDerivation rec {
     git jq yq-go tmux findutils gnumake
     hivemind
 
-    clickhouse
+    # clickhouse
     nsq
     # prometheus zookeeper
 

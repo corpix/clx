@@ -1,1 +1,1 @@
-dists/quicklisp/software/cl+ssl-20210630-git/cl+ssl.asd
+dists/quicklisp/software/cl+ssl-20211020-git/cl+ssl.asd

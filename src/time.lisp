@@ -1,10 +1,11 @@
-(in-package #:cl-user)
+(in-package :cl-user)
 (defpackage clx/time
-  (:use #:clx/std)
-  (:local-nicknames (#:lt #:local-time)
-		    (#:ltd #:local-time-duration))
-  (:export #:unixnano-to-timestamp))
-(in-package #:clx/time)
+  (:use :clx/std)
+  (:local-nicknames
+   (:lt :local-time)
+   (:ltd :local-time-duration))
+  (:export :unixnano-to-timestamp))
+(in-package :clx/time)
 
 ;; timestamp-difference conflicts with same symbol from local-time-duration
 ;; so exluding it, having difference as duration is better

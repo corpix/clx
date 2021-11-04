@@ -1,20 +1,26 @@
-(in-package #:cl-user)
+(in-package :cl-user)
 (defpackage clx/telegram
-  (:nicknames #:clx/tg)
-  (:use #:clx/std #:clx/http #:clx/uri)
-  (:local-nicknames (#:json #:clx/json))
-  (:import-from #:trivia #:let-match*)
-  (:export #:*token*
-	   #:*api*
-	   #:*poll-timeout*
-	   #:token-required
+  (:nicknames :clx/tg)
+  (:use
+   :clx/std
+   :clx/http
+   :clx/uri)
+  (:local-nicknames (:json :clx/json))
+  (:import-from
+   :trivia
+   :let-match*)
+  (:export
+   :*token*
+   :*api*
+   :*poll-timeout*
+   :token-required
 
-	   #:defbotapi
-	   #:get-me
-	   #:get-updates
-	   #:send-message
-	   #:send-photo
-	   #:send-document))
+   :defbotapi
+   :get-me
+   :get-updates
+   :send-message
+   :send-photo
+   :send-document))
 (in-package #:clx/telegram)
 
 (defparameter *token* "")

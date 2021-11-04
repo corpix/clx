@@ -1,0 +1,141 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(ql:quickload '(:mito-migration :dbi :sxql :uiop :alexandria) :silent t)
+
+(defpackage :ros.script.roswell/mito.3663426439
+  (:use #:cl
+        #:mito.migration)
+  (:import-from #:mito.core
+                #:*connection*
+                #:*mito-logger-stream*
+                #:execute-sql)
+  (:import-from #:dbi
+                #:with-transaction
+                #:connect
+                #:<dbi-database-error>)
+  (:import-from #:sxql
+                #:yield)
+  (:import-from #:alexandria
+                #:nconcf))
+(in-package :ros.script.roswell/mito.3663426439)
+
+(defparameter *default-migration-directory*
+  (merge-pathnames #P"db/" *default-pathname-defaults*))
+
+(defmacro case-equal (keyform &body cases)
+  (let ((g-keyform (gensym "KEYFORM")))
+    `(let ((,g-keyform ,keyform))
+       (cond
+         ,@(loop for (case . body) in cases
+                 if (eq case 'otherwise)
+                   collect `(t ,@body)
+                 else
+                   collect `((find ,g-keyform ',(if (listp case)
+                                                    case
+                                                    (list case))
+                                   :test #'equal)
+                             ,@body))))))
+
+(defun parse-args (args)
+  (let ((connect-args '())
+        driver-type
+        (directory *default-migration-directory*)
+        (systems '())
+        force
+        dry-run)
+    (loop for option = (pop args)
+          while option
+          do (case-equal option
+               (("-t" "--type")
+                (let ((driver (pop args)))
+                  (setf driver-type
+                        (if driver
+                            (intern (string-upcase driver) :keyword)
+                            nil))))
+               (("-d" "--database")
+                (nconcf connect-args (list :database-name (pop args))))
+               (("-u" "--username")
+                (nconcf connect-args (list :username (pop args))))
+               (("-p" "--password")
+                (nconcf connect-args (list :password (pop args))))
+               (("-H" "--host")
+                (nconcf connect-args (list :host (pop args))))
+               (("-P" "--port")
+                (nconcf connect-args (list :port (parse-integer (pop args)))))
+               (("-s" "--system")
+                (push (pop args) systems))
+               (("-D" "--directory")
+                (setf directory (uiop:ensure-directory-pathname (pop args))))
+               ("--dry-run"
+                (setf dry-run t))
+               (("-f" "--force")
+                (setf force t))
+               (otherwise (error "Unknown option: ~A" option))))
+    (values (cons driver-type connect-args) directory (nreverse systems) dry-run force)))
+
+(defun print-usage ()
+  (format *error-output* "~&Usage: mito command [option...]
+
+Commands:
+    generate-migrations
+    migrate
+    migration-status
+
+Options:
+    -t, --type DRIVER-TYPE          DBI driver type (one of \"mysql\", \"postgres\" or \"sqlite3\")
+    -H, --host DATABASE-HOST        Database host to use (default is 127.0.0.1)
+    -P, --port DATABASE-PORT        Database port to use (default is depends on the driver type)
+    -d, --database DATABASE-NAME    Database name to use
+    -u, --username USERNAME         Username for RDBMS
+    -p, --password PASSWORD         Password for RDBMS
+    -s, --system SYSTEM             ASDF system to load (several -s's allowed)
+    -D, --directory DIRECTORY       Directory path to keep migration SQL files (default: \"~A\")
+    --dry-run                       List SQL expressions to migrate
+    -f, --force                     Create a new empty migration file even when it's unnecessary.
+"
+          *default-migration-directory*))
+
+(defun main (&optional command &rest argv)
+  (unless (find command '("generate-migrations" "migrate" "migration-status") :test #'string=)
+    (when command
+      (format *error-output* "~&Invalid command: ~A~%" command))
+    (print-usage)
+    (uiop:quit -1))
+
+  (multiple-value-bind (connect-args directory systems dry-run force)
+      (handler-case (parse-args argv)
+        (error (e) (format *error-output* "~&~A~%" e) (uiop:quit -1)))
+    (when (null (first connect-args))
+      (format *error-output* "~&--type is required.~%")
+      (uiop:quit -1))
+    (unless (getf (cdr connect-args) :database-name)
+      (format *error-output* "~&--database is required.~%")
+      (uiop:quit -1))
+
+    (dolist (system systems)
+      (format t "~&Loading ~S...~%" system)
+      (ql:quickload system :silent t))
+    (write-char #\Newline)
+    (handler-case
+        (let ((*connection* (handler-case (let ((*standard-output* (make-broadcast-stream)))
+                                            (apply #'dbi:connect connect-args))
+                              (ql:system-not-found ()
+                                (format *error-output* "~&Unknown driver type: ~A~%" (first connect-args))
+                                (uiop:quit -1))
+                              (error (e)
+                                (format *error-output* "~&Failed to connect to the database:~%  ~A~%" e)
+                                (uiop:quit -1)))))
+          (setf *mito-logger-stream* nil)
+          (case-equal command
+            ("generate-migrations"
+             (mito.migration:generate-migrations directory :force force))
+            ("migrate"
+             (mito.migration:migrate directory :dry-run dry-run))
+            ("migration-status"
+             (mito.migration:migration-status directory))))
+      (dbi:<dbi-database-error> (e)
+        (format *error-output* "~&~A~%" e)
+        (uiop:quit -1)))))

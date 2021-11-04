@@ -1,1 +1,1 @@
-dists/quicklisp/software/lisp-namespace-20171130-git/
+dists/quicklisp/software/lisp-namespace-20211020-git/

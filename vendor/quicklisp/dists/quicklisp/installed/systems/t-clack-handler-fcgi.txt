@@ -1,1 +1,1 @@
-dists/quicklisp/software/clack-20210531-git/t-clack-handler-fcgi.asd
+dists/quicklisp/software/clack-20210807-git/t-clack-handler-fcgi.asd

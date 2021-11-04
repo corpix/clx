@@ -1,14 +1,15 @@
-(in-package #:cl-user)
+(in-package :cl-user)
 (defpackage clx/binary
-  (:use #:clx/std)
-  (:local-nicknames (#:lb #:lisp-binary))
-  (:export #:read-integer
-	   #:read-integer-be
-	   #:read-integer-le
-	   #:write-integer
-	   #:write-integer-be
-	   #:write-integer-le))
-(in-package #:clx/binary)
+  (:use :clx/std)
+  (:local-nicknames (:lb :lisp-binary))
+  (:export
+   :read-integer
+   :read-integer-be
+   :read-integer-le
+   :write-integer
+   :write-integer-be
+   :write-integer-le))
+(in-package :clx/binary)
 
 (reexport-from :cl-octet-streams :include
 	       '(:make-octet-input-stream

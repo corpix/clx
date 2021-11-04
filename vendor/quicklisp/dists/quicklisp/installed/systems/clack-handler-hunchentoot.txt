@@ -1,1 +1,1 @@
-dists/quicklisp/software/clack-20210531-git/clack-handler-hunchentoot.asd
+dists/quicklisp/software/clack-20210807-git/clack-handler-hunchentoot.asd

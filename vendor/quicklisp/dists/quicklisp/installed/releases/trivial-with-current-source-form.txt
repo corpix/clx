@@ -1,1 +1,1 @@
-dists/quicklisp/software/trivial-with-current-source-form-20210630-git/
+dists/quicklisp/software/trivial-with-current-source-form-20211020-git/

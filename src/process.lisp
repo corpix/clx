@@ -1,24 +1,25 @@
-(in-package #:cl-user)
+(in-package :cl-user)
 (defpackage clx/process
-  (:use #:clx/std)
-  (:export #:process
-	   #:processp
-	   #:process-pid
-	   #:process-command
-	   #:process-status
-	   #:process-exit-code
-	   #:process-input
-	   #:process-output
-	   #:process-error
-	   #:run-process
-	   #:process-alive-p
-	   #:process-wait
-	   #:process-send-signal
-	   #:process-kill
-	   #:process-terminate
-	   #:process-stop
-	   #:process-continue))
-(in-package #:clx/process)
+  (:use :clx/std)
+  (:export
+   :process
+   :processp
+   :process-pid
+   :process-command
+   :process-status
+   :process-exit-code
+   :process-input
+   :process-output
+   :process-error
+   :run-process
+   :process-alive-p
+   :process-wait
+   :process-send-signal
+   :process-kill
+   :process-terminate
+   :process-stop
+   :process-continue))
+(in-package :clx/process)
 
 ;; this file was originaly part of cl21
 ;; I've borrowed and modified it to work without cl21

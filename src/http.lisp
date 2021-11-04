@@ -1,16 +1,17 @@
-(in-package #:cl-user)
+(in-package :cl-user)
 (defpackage clx/http
-  (:use #:clx/std #:clx/uri)
-  (:export #:request
-	   #:request-method
-	   #:request-uri
-	   #:request-content
-	   #:request-headers
-	   #:request-p
-	   #:make-request
+  (:use :clx/std :clx/uri)
+  (:export
+   :request
+   :request-method
+   :request-uri
+   :request-content
+   :request-headers
+   :request-p
+   :make-request
 
-	   #:do-request))
-(in-package #:clx/http)
+   :do-request))
+(in-package :clx/http)
 
 (reexport-from :dexador :exclude
 	       '(:get :post :head :put :patch :delete :request

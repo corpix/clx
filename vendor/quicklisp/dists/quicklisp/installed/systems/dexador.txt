@@ -1,1 +1,1 @@
-dists/quicklisp/software/dexador-20210630-git/dexador.asd
+dists/quicklisp/software/dexador-20210807-git/dexador.asd
