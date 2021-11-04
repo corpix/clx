@@ -100,7 +100,6 @@
 
 (defmethod display ((sql sql-select))
   (with-slots (columns from) sql
-    (print from)
     (concatenate 'string
 		 "select " (display columns)
 		 (and from " from ")
